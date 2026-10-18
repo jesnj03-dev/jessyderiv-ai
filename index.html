@@ -1,0 +1,264 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#080d16">
+  <title>JessyDeriv AI | Trading Terminal</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #080d16;
+      --panel: #101a28;
+      --line: #263449;
+      --mint: #42f5b3;
+      --text: #e5edf5;
+      --muted: #8b9bb0;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, Arial, sans-serif;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 5%;
+      border-bottom: 1px solid var(--line);
+    }
+    .brand { font-size: 21px; font-weight: 800; }
+    .brand span { color: var(--mint); }
+    .status { color: var(--mint); font-size: 12px; }
+    main { max-width: 1250px; margin: auto; padding: 28px 5%; }
+    .welcome { margin-bottom: 24px; }
+    .welcome h1 { margin-bottom: 8px; font-size: clamp(25px, 4vw, 38px); }
+    .welcome p, .muted { color: var(--muted); }
+    .cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+      gap: 15px;
+    }
+    .card, .chart-panel, .market-panel {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 20px;
+    }
+    .label { color: var(--muted); font-size: 13px; }
+    .value { font-size: 25px; font-weight: 750; margin-top: 12px; }
+    .tag {
+      display: inline-block;
+      padding: 6px 10px;
+      border-radius: 7px;
+      background: #16352f;
+      color: var(--mint);
+      font-size: 12px;
+    }
+    .section-title { margin: 30px 0 14px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
+    select, button {
+      background: #172437;
+      color: var(--text);
+      border: 1px solid var(--line);
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 14px;
+    }
+    button { cursor: pointer; }
+    button.primary { background: var(--mint); color: #06130e; font-weight: 800; }
+    button:hover { filter: brightness(1.12); }
+    #chart {
+      width: 100%;
+      height: 340px;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
+    .notice {
+      margin-top: 18px;
+      padding: 14px;
+      border-radius: 9px;
+      background: #172437;
+      color: var(--muted);
+      line-height: 1.6;
+      font-size: 13px;
+    }
+    footer { padding: 25px 5%; color: var(--muted); font-size: 12px; text-align: center; }
+    @media(max-width: 500px) {
+      header { padding: 15px 4%; }
+      main { padding: 22px 4%; }
+      #chart { height: 280px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand">JESSYDERIV <span>AI</span></div>
+    <div class="status" id="connection">● Demo preview</div>
+  </header>
+
+  <main>
+    <section class="welcome">
+      <span class="tag">TRADING TERMINAL</span>
+      <h1>Trade smarter. <span style="color:var(--mint)">Stay in control.</span></h1>
+      <p>One workspace for markets, charts, analysis and trading strategies.</p>
+    </section>
+
+    <div class="toolbar">
+      <button class="primary" id="demoBtn">Demo mode</button>
+      <button id="connectBtn">Connect Deriv</button>
+      <span class="muted" id="modeText">Demo preview · No real trades</span>
+    </div>
+
+    <section class="cards">
+      <div class="card">
+        <div class="label">Account balance</div>
+        <div class="value" id="balance">Not connected</div>
+        <p class="muted">Verified account data only</p>
+      </div>
+      <div class="card">
+        <div class="label">Selected market</div>
+        <div class="value" id="marketValue">Volatility 100</div>
+        <p class="muted">Change the market below</p>
+      </div>
+      <div class="card">
+        <div class="label">Trading bots</div>
+        <div class="value">Demo only</div>
+        <p class="muted">Automation not activated</p>
+      </div>
+    </section>
+
+    <h2 class="section-title">Live market chart</h2>
+    <section class="chart-panel">
+      <div class="toolbar">
+        <select id="market">
+          <option value="R_100">Volatility 100 Index</option>
+          <option value="R_75">Volatility 75 Index</option>
+          <option value="R_50">Volatility 50 Index</option>
+          <option value="R_25">Volatility 25 Index</option>
+          <option value="R_10">Volatility 10 Index</option>
+          <option value="1HZ100V">Volatility 100 (1s)</option>
+          <option value="1HZ75V">Volatility 75 (1s)</option>
+          <option value="1HZ50V">Volatility 50 (1s)</option>
+          <option value="1HZ25V">Volatility 25 (1s)</option>
+          <option value="1HZ10V">Volatility 10 (1s)</option>
+        </select>
+        <select id="interval">
+          <option value="60">1 minute</option>
+          <option value="300">5 minutes</option>
+          <option value="900">15 minutes</option>
+          <option value="3600">1 hour</option>
+        </select>
+        <button id="loadChart">Load chart</button>
+      </div>
+      <div id="chart"></div>
+      <div class="notice" id="chartStatus">
+        Chart requires a market-data connection. Select a market and click Load chart.
+      </div>
+    </section>
+
+    <h2 class="section-title">Contract explorer</h2>
+    <section class="market-panel">
+      <p class="muted">Explore contract categories before connecting your account.</p>
+      <div class="toolbar">
+        <select id="contract">
+          <option>Rise</option>
+          <option>Fall</option>
+          <option>Digit Over</option>
+          <option>Digit Under</option>
+          <option>Matches</option>
+          <option>Differs</option>
+          <option>Even</option>
+          <option>Odd</option>
+          <option>Touch</option>
+          <option>No Touch</option>
+          <option>Ends Between</option>
+          <option>Goes Outside</option>
+          <option>Stays Between</option>
+          <option>Multipliers</option>
+        </select>
+        <button id="contractBtn">View selection</button>
+      </div>
+      <p id="contractStatus" class="muted">No trade placed.</p>
+      <div class="notice">
+        Contract availability depends on the selected market and your Deriv account.
+        This explorer does not place orders.
+      </div>
+    </section>
+
+    <h2 class="section-title">Bot laboratory</h2>
+    <section class="cards">
+      <div class="card">
+        <span class="tag">DEMO PREVIEW</span>
+        <h3>Rise / Fall bot</h3>
+        <p class="muted">Strategy controls will be added after the API connection.</p>
+        <button class="botBtn">Configure bot</button>
+      </div>
+      <div class="card">
+        <span class="tag">DEMO PREVIEW</span>
+        <h3>Digit Over / Under bot</h3>
+        <p class="muted">Test a digit strategy after market data is connected.</p>
+        <button class="botBtn">Configure bot</button>
+      </div>
+    </section>
+
+    <div class="notice">
+      Independent third-party project concept. Deriv API access, account authentication,
+      verified live prices and trading functionality have not yet been configured.
+      Trading involves risk; no signal or bot guarantees profit.
+    </div>
+  </main>
+
+  <footer>JessyDeriv AI · Precision. Power. Performance.</footer>
+
+  <script>
+    const market = document.getElementById('market');
+    const interval = document.getElementById('interval');
+    const chartStatus = document.getElementById('chartStatus');
+
+    market.addEventListener('change', () => {
+      document.getElementById('marketValue').textContent =
+        market.options[market.selectedIndex].text;
+      chartStatus.textContent = 'Selected ' +
+        market.options[market.selectedIndex].text +
+        '. Connect market data to display candles.';
+    });
+
+    document.getElementById('loadChart').addEventListener('click', () => {
+      chartStatus.textContent = 'Selected market: ' +
+        market.options[market.selectedIndex].text +
+        '. Candle interval: ' + interval.options[interval.selectedIndex].text +
+        '. Live data integration is the next development step.';
+    });
+
+    document.getElementById('demoBtn').addEventListener('click', () => {
+      document.getElementById('modeText').textContent =
+        'Demo preview · No real trades';
+      document.getElementById('connection').textContent = '● Demo preview';
+      document.getElementById('balance').textContent = 'Not connected';
+    });
+
+    document.getElementById('connectBtn').addEventListener('click', () => {
+      alert('Deriv authorization is not configured yet. We will connect it in a later step.');
+    });
+
+    document.getElementById('contractBtn').addEventListener('click', () => {
+      document.getElementById('contractStatus').textContent =
+        'Selected contract: ' +
+        document.getElementById('contract').value +
+        '. No trade placed.';
+    });
+
+    document.querySelectorAll('.botBtn').forEach(button => {
+      button.addEventListener('click', () => {
+        alert('Bot execution has not been enabled. We will implement demo safeguards first.');
+      });
+    });
+  </script>
+</body>
+</html>
