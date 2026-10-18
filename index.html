@@ -4,261 +4,473 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#080d16">
-  <title>JessyDeriv AI | Trading Terminal</title>
+  <title>JessyDeriv AI | Live Charts</title>
+
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
+
   <style>
     :root {
-      color-scheme: dark;
-      --bg: #080d16;
-      --panel: #101a28;
-      --line: #263449;
-      --mint: #42f5b3;
-      --text: #e5edf5;
-      --muted: #8b9bb0;
+      --bg: #07111f;
+      --panel: #101e30;
+      --border: #24354a;
+      --mint: #45f5b0;
+      --text: #edf5ff;
+      --muted: #91a4bb;
     }
+
     * { box-sizing: border-box; }
+
     body {
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font-family: Inter, Arial, sans-serif;
+      font-family: Arial, sans-serif;
     }
+
     header {
+      padding: 22px;
+      border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
-      padding: 18px 5%;
-      border-bottom: 1px solid var(--line);
+      flex-wrap: wrap;
+      gap: 12px;
     }
-    .brand { font-size: 21px; font-weight: 800; }
+
+    .brand { font-size: 22px; font-weight: 800; }
     .brand span { color: var(--mint); }
-    .status { color: var(--mint); font-size: 12px; }
-    main { max-width: 1250px; margin: auto; padding: 28px 5%; }
-    .welcome { margin-bottom: 24px; }
-    .welcome h1 { margin-bottom: 8px; font-size: clamp(25px, 4vw, 38px); }
-    .welcome p, .muted { color: var(--muted); }
-    .cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-      gap: 15px;
-    }
-    .card, .chart-panel, .market-panel {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 14px;
-      padding: 20px;
-    }
-    .label { color: var(--muted); font-size: 13px; }
-    .value { font-size: 25px; font-weight: 750; margin-top: 12px; }
-    .tag {
-      display: inline-block;
-      padding: 6px 10px;
-      border-radius: 7px;
-      background: #16352f;
-      color: var(--mint);
-      font-size: 12px;
-    }
-    .section-title { margin: 30px 0 14px; }
-    .toolbar { display: flex; flex-wrap: wrap; gap: 10px; margin: 15px 0; }
-    select, button {
-      background: #172437;
-      color: var(--text);
-      border: 1px solid var(--line);
-      padding: 11px 14px;
-      border-radius: 8px;
-      font-size: 14px;
-    }
-    button { cursor: pointer; }
-    button.primary { background: var(--mint); color: #06130e; font-weight: 800; }
-    button:hover { filter: brightness(1.12); }
-    #chart {
-      width: 100%;
-      height: 340px;
-      border-radius: 10px;
-      overflow: hidden;
-    }
-    .actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 18px; }
-    .notice {
-      margin-top: 18px;
-      padding: 14px;
-      border-radius: 9px;
-      background: #172437;
+    .tagline { color: var(--muted); font-size: 12px; margin-top: 5px; }
+
+    .status {
       color: var(--muted);
-      line-height: 1.6;
       font-size: 13px;
     }
-    footer { padding: 25px 5%; color: var(--muted); font-size: 12px; text-align: center; }
-    @media(max-width: 500px) {
-      header { padding: 15px 4%; }
-      main { padding: 22px 4%; }
-      #chart { height: 280px; }
+
+    .dot {
+      display: inline-block;
+      width: 9px;
+      height: 9px;
+      border-radius: 50%;
+      background: #8795a7;
+      margin-right: 7px;
+    }
+
+    main {
+      width: min(1200px, 100%);
+      margin: auto;
+      padding: 22px;
+    }
+
+    .intro { margin-bottom: 20px; }
+    h1 { font-size: 25px; margin: 0 0 8px; }
+    p { color: var(--muted); line-height: 1.5; }
+
+    .panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px;
+      margin-bottom: 18px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+    }
+
+    .field { flex: 1; min-width: 145px; }
+
+    label {
+      display: block;
+      font-size: 12px;
+      color: var(--muted);
+      margin-bottom: 8px;
+    }
+
+    select, button {
+      width: 100%;
+      padding: 12px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: #091626;
+      color: var(--text);
+      font-size: 14px;
+    }
+
+    button {
+      background: var(--mint);
+      color: #06151a;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+    }
+
+    button:hover { opacity: .9; }
+
+    .chart-heading {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .chart-heading h2 { font-size: 18px; margin: 0; }
+    #price { color: var(--mint); font-weight: bold; }
+
+    #chart {
+      width: 100%;
+      height: 430px;
+      min-height: 300px;
+    }
+
+    #message {
+      margin-top: 12px;
+      font-size: 13px;
+      color: var(--muted);
+      overflow-wrap: anywhere;
+    }
+
+    .note {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    footer {
+      text-align: center;
+      padding: 22px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    footer a { color: var(--mint); }
+
+    @media (max-width: 600px) {
+      main { padding: 12px; }
+      header { padding: 16px; }
+      .panel { padding: 12px; }
+      #chart { height: 350px; }
     }
   </style>
 </head>
+
 <body>
   <header>
-    <div class="brand">JESSYDERIV <span>AI</span></div>
-    <div class="status" id="connection">● Demo preview</div>
+    <div>
+      <div class="brand">Jessy<span>Deriv</span> AI</div>
+      <div class="tagline">PRECISION. POWER. PERFORMANCE.</div>
+    </div>
+    <div class="status">
+      <span class="dot" id="statusDot"></span>
+      <span id="statusText">Not connected</span>
+    </div>
   </header>
 
   <main>
-    <section class="welcome">
-      <span class="tag">TRADING TERMINAL</span>
-      <h1>Trade smarter. <span style="color:var(--mint)">Stay in control.</span></h1>
-      <p>One workspace for markets, charts, analysis and trading strategies.</p>
+    <section class="intro">
+      <h1>Live Market Charts</h1>
+      <p>View Deriv synthetic-index candles and monitor price movements in real time.</p>
     </section>
 
-    <div class="toolbar">
-      <button class="primary" id="demoBtn">Demo mode</button>
-      <button id="connectBtn">Connect Deriv</button>
-      <span class="muted" id="modeText">Demo preview · No real trades</span>
-    </div>
+    <section class="panel">
+      <div class="controls">
+        <div class="field">
+          <label for="symbol">MARKET</label>
+          <select id="symbol">
+            <option value="R_10">Volatility 10 Index</option>
+            <option value="R_25">Volatility 25 Index</option>
+            <option value="R_50">Volatility 50 Index</option>
+            <option value="R_75">Volatility 75 Index</option>
+            <option value="R_100" selected>Volatility 100 Index</option>
+            <option value="1HZ10V">Volatility 10 (1s) Index</option>
+            <option value="1HZ25V">Volatility 25 (1s) Index</option>
+            <option value="1HZ50V">Volatility 50 (1s) Index</option>
+            <option value="1HZ75V">Volatility 75 (1s) Index</option>
+            <option value="1HZ100V">Volatility 100 (1s) Index</option>
+          </select>
+        </div>
 
-    <section class="cards">
-      <div class="card">
-        <div class="label">Account balance</div>
-        <div class="value" id="balance">Not connected</div>
-        <p class="muted">Verified account data only</p>
-      </div>
-      <div class="card">
-        <div class="label">Selected market</div>
-        <div class="value" id="marketValue">Volatility 100</div>
-        <p class="muted">Change the market below</p>
-      </div>
-      <div class="card">
-        <div class="label">Trading bots</div>
-        <div class="value">Demo only</div>
-        <p class="muted">Automation not activated</p>
+        <div class="field">
+          <label for="interval">CANDLE TIMEFRAME</label>
+          <select id="interval">
+            <option value="60">1 minute</option>
+            <option value="300">5 minutes</option>
+            <option value="900">15 minutes</option>
+            <option value="3600">1 hour</option>
+          </select>
+        </div>
+
+        <div class="field" style="min-width:120px;flex:.6">
+          <label>&nbsp;</label>
+          <button id="connectBtn">Load Live Chart</button>
+        </div>
       </div>
     </section>
 
-    <h2 class="section-title">Live market chart</h2>
-    <section class="chart-panel">
-      <div class="toolbar">
-        <select id="market">
-          <option value="R_100">Volatility 100 Index</option>
-          <option value="R_75">Volatility 75 Index</option>
-          <option value="R_50">Volatility 50 Index</option>
-          <option value="R_25">Volatility 25 Index</option>
-          <option value="R_10">Volatility 10 Index</option>
-          <option value="1HZ100V">Volatility 100 (1s)</option>
-          <option value="1HZ75V">Volatility 75 (1s)</option>
-          <option value="1HZ50V">Volatility 50 (1s)</option>
-          <option value="1HZ25V">Volatility 25 (1s)</option>
-          <option value="1HZ10V">Volatility 10 (1s)</option>
-        </select>
-        <select id="interval">
-          <option value="60">1 minute</option>
-          <option value="300">5 minutes</option>
-          <option value="900">15 minutes</option>
-          <option value="3600">1 hour</option>
-        </select>
-        <button id="loadChart">Load chart</button>
+    <section class="panel">
+      <div class="chart-heading">
+        <h2 id="chartTitle">Volatility 100 Index</h2>
+        <div id="price">Waiting for price…</div>
       </div>
+
       <div id="chart"></div>
-      <div class="notice" id="chartStatus">
-        Chart requires a market-data connection. Select a market and click Load chart.
-      </div>
+      <div id="message">Choose a market and tap Load Live Chart.</div>
     </section>
 
-    <h2 class="section-title">Contract explorer</h2>
-    <section class="market-panel">
-      <p class="muted">Explore contract categories before connecting your account.</p>
-      <div class="toolbar">
-        <select id="contract">
-          <option>Rise</option>
-          <option>Fall</option>
-          <option>Digit Over</option>
-          <option>Digit Under</option>
-          <option>Matches</option>
-          <option>Differs</option>
-          <option>Even</option>
-          <option>Odd</option>
-          <option>Touch</option>
-          <option>No Touch</option>
-          <option>Ends Between</option>
-          <option>Goes Outside</option>
-          <option>Stays Between</option>
-          <option>Multipliers</option>
-        </select>
-        <button id="contractBtn">View selection</button>
-      </div>
-      <p id="contractStatus" class="muted">No trade placed.</p>
-      <div class="notice">
-        Contract availability depends on the selected market and your Deriv account.
-        This explorer does not place orders.
-      </div>
+    <section class="panel">
+      <h2>Connection information</h2>
+      <p id="connectionInfo">
+        This chart connects to public market data. No trading account is connected.
+      </p>
+      <p class="note">
+        Market data can be unavailable for some symbols or during service interruptions.
+        This chart does not place trades or guarantee trading signals.
+      </p>
     </section>
-
-    <h2 class="section-title">Bot laboratory</h2>
-    <section class="cards">
-      <div class="card">
-        <span class="tag">DEMO PREVIEW</span>
-        <h3>Rise / Fall bot</h3>
-        <p class="muted">Strategy controls will be added after the API connection.</p>
-        <button class="botBtn">Configure bot</button>
-      </div>
-      <div class="card">
-        <span class="tag">DEMO PREVIEW</span>
-        <h3>Digit Over / Under bot</h3>
-        <p class="muted">Test a digit strategy after market data is connected.</p>
-        <button class="botBtn">Configure bot</button>
-      </div>
-    </section>
-
-    <div class="notice">
-      Independent third-party project concept. Deriv API access, account authentication,
-      verified live prices and trading functionality have not yet been configured.
-      Trading involves risk; no signal or bot guarantees profit.
-    </div>
   </main>
 
-  <footer>JessyDeriv AI · Precision. Power. Performance.</footer>
+  <footer>
+    Charts by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView Lightweight Charts</a>.
+    Market data via the <a href="https://developers.deriv.com/" target="_blank" rel="noopener">Deriv API</a>.
+  </footer>
 
   <script>
-    const market = document.getElementById('market');
-    const interval = document.getElementById('interval');
-    const chartStatus = document.getElementById('chartStatus');
+    const chartElement = document.getElementById("chart");
+    const symbolSelect = document.getElementById("symbol");
+    const intervalSelect = document.getElementById("interval");
+    const message = document.getElementById("message");
+    const statusText = document.getElementById("statusText");
+    const statusDot = document.getElementById("statusDot");
+    const priceElement = document.getElementById("price");
+    const chartTitle = document.getElementById("chartTitle");
+    const connectBtn = document.getElementById("connectBtn");
 
-    market.addEventListener('change', () => {
-      document.getElementById('marketValue').textContent =
-        market.options[market.selectedIndex].text;
-      chartStatus.textContent = 'Selected ' +
-        market.options[market.selectedIndex].text +
-        '. Connect market data to display candles.';
+    const names = {
+      R_10: "Volatility 10 Index",
+      R_25: "Volatility 25 Index",
+      R_50: "Volatility 50 Index",
+      R_75: "Volatility 75 Index",
+      R_100: "Volatility 100 Index",
+      "1HZ10V": "Volatility 10 (1s) Index",
+      "1HZ25V": "Volatility 25 (1s) Index",
+      "1HZ50V": "Volatility 50 (1s) Index",
+      "1HZ75V": "Volatility 75 (1s) Index",
+      "1HZ100V": "Volatility 100 (1s) Index"
+    };
+
+    let socket = null;
+    let requestNumber = 1;
+    let candlesSeries = null;
+    let reconnectTimer = null;
+    let manuallyStopped = false;
+
+    const chart = LightweightCharts.createChart(chartElement, {
+      autoSize: true,
+      layout: {
+        background: { color: "#101e30" },
+        textColor: "#b8c8dc"
+      },
+      grid: {
+        vertLines: { color: "#1b2b40" },
+        horzLines: { color: "#1b2b40" }
+      },
+      rightPriceScale: { borderColor: "#304258" },
+      timeScale: {
+        borderColor: "#304258",
+        timeVisible: true,
+        secondsVisible: false
+      },
+      crosshair: { mode: 0 }
     });
 
-    document.getElementById('loadChart').addEventListener('click', () => {
-      chartStatus.textContent = 'Selected market: ' +
-        market.options[market.selectedIndex].text +
-        '. Candle interval: ' + interval.options[interval.selectedIndex].text +
-        '. Live data integration is the next development step.';
+    candlesSeries = chart.addSeries(
+      LightweightCharts.CandlestickSeries,
+      {
+        upColor: "#45f5b0",
+        downColor: "#ff5c78",
+        borderUpColor: "#45f5b0",
+        borderDownColor: "#ff5c78",
+        wickUpColor: "#45f5b0",
+        wickDownColor: "#ff5c78"
+      }
+    );
+
+    function setStatus(text, color) {
+      statusText.textContent = text;
+      statusDot.style.background = color;
+    }
+
+    function showError(text) {
+      message.textContent = text;
+      message.style.color = "#ff9aa9";
+    }
+
+    function closeConnection() {
+      manuallyStopped = true;
+      clearTimeout(reconnectTimer);
+
+      if (socket) {
+        socket.onclose = null;
+        socket.onerror = null;
+        socket.onmessage = null;
+        socket.close();
+        socket = null;
+      }
+
+      setStatus("Disconnected", "#8795a7");
+    }
+
+    function connect() {
+      closeConnection();
+      manuallyStopped = false;
+
+      const symbol = symbolSelect.value;
+      const granularity = Number(intervalSelect.value);
+
+      chartTitle.textContent = names[symbol] || symbol;
+      priceElement.textContent = "Waiting for price…";
+      message.style.color = "#91a4bb";
+      message.textContent = "Connecting to Deriv market data…";
+      candlesSeries.setData([]);
+
+      setStatus("Connecting…", "#ffc857");
+      connectBtn.textContent = "Connecting…";
+      connectBtn.disabled = true;
+
+      // Public market-data connection. No account token is used.
+      const appId = "1089";
+      const url = "wss://ws.derivws.com/websockets/v3?app_id=" + appId;
+
+      try {
+        socket = new WebSocket(url);
+      } catch (error) {
+        showError("Could not start the connection. Please try again.");
+        setStatus("Connection error", "#ff5c78");
+        connectBtn.disabled = false;
+        connectBtn.textContent = "Retry Chart";
+        return;
+      }
+
+      socket.onopen = function () {
+        setStatus("Connected", "#45f5b0");
+        message.textContent = "Requesting candle history for " + names[symbol] + "…";
+
+        socket.send(JSON.stringify({
+          ticks_history: symbol,
+          adjust_start_time: 1,
+          count: 100,
+          end: "latest",
+          granularity: granularity,
+          style: "candles",
+          subscribe: 1,
+          req_id: requestNumber++
+        }));
+      };
+
+      socket.onmessage = function (event) {
+        let data;
+
+        try {
+          data = JSON.parse(event.data);
+        } catch (error) {
+          return;
+        }
+
+        if (data.error) {
+          showError("Deriv API: " + data.error.message);
+          setStatus("Data error", "#ff5c78");
+          connectBtn.disabled = false;
+          connectBtn.textContent = "Retry Chart";
+          return;
+        }
+
+        if (data.candles && data.candles.length) {
+          const formatted = data.candles.map(c => ({
+            time: Number(c.epoch),
+            open: Number(c.open),
+            high: Number(c.high),
+            low: Number(c.low),
+            close: Number(c.close)
+          })).filter(c =>
+            Number.isFinite(c.time) &&
+            Number.isFinite(c.open) &&
+            Number.isFinite(c.high) &&
+            Number.isFinite(c.low) &&
+            Number.isFinite(c.close)
+          );
+
+          if (formatted.length) {
+            candlesSeries.setData(formatted);
+            chart.timeScale().fitContent();
+
+            const last = formatted[formatted.length - 1];
+            priceElement.textContent = "Latest: " + last.close;
+
+            message.style.color = "#45f5b0";
+            message.textContent =
+              "Historical candles loaded. Waiting for live updates…";
+            connectBtn.disabled = false;
+            connectBtn.textContent = "Refresh Chart";
+          }
+        }
+
+        if (data.ohlc) {
+          const c = data.ohlc;
+
+          const candle = {
+            time: Number(c.open_time),
+            open: Number(c.open),
+            high: Number(c.high),
+            low: Number(c.low),
+            close: Number(c.close)
+          };
+
+          if (
+            Number.isFinite(candle.time) &&
+            Number.isFinite(candle.open) &&
+            Number.isFinite(candle.high) &&
+            Number.isFinite(candle.low) &&
+            Number.isFinite(candle.close)
+          ) {
+            candlesSeries.update(candle);
+            priceElement.textContent = "Latest: " + candle.close;
+            message.style.color = "#45f5b0";
+            message.textContent = "Live market updates are arriving.";
+            setStatus("Live data", "#45f5b0");
+            connectBtn.disabled = false;
+            connectBtn.textContent = "Refresh Chart";
+          }
+        }
+      };
+
+      socket.onerror = function () {
+        showError("Connection problem. Check your internet and try again.");
+        setStatus("Connection error", "#ff5c78");
+        connectBtn.disabled = false;
+        connectBtn.textContent = "Retry Chart";
+      };
+
+      socket.onclose = function () {
+        if (!manuallyStopped) {
+          setStatus("Disconnected", "#ff5c78");
+          connectBtn.disabled = false;
+          connectBtn.textContent = "Retry Chart";
+          message.textContent =
+            "Connection closed. Tap Retry Chart to reconnect.";
+        }
+      };
+    }
+
+    connectBtn.addEventListener("click", connect);
+
+    symbolSelect.addEventListener("change", function () {
+      chartTitle.textContent = names[symbolSelect.value];
     });
 
-    document.getElementById('demoBtn').addEventListener('click', () => {
-      document.getElementById('modeText').textContent =
-        'Demo preview · No real trades';
-      document.getElementById('connection').textContent = '● Demo preview';
-      document.getElementById('balance').textContent = 'Not connected';
-    });
-
-    document.getElementById('connectBtn').addEventListener('click', () => {
-      alert('Deriv authorization is not configured yet. We will connect it in a later step.');
-    });
-
-    document.getElementById('contractBtn').addEventListener('click', () => {
-      document.getElementById('contractStatus').textContent =
-        'Selected contract: ' +
-        document.getElementById('contract').value +
-        '. No trade placed.';
-    });
-
-    document.querySelectorAll('.botBtn').forEach(button => {
-      button.addEventListener('click', () => {
-        alert('Bot execution has not been enabled. We will implement demo safeguards first.');
-      });
-    });
+    window.addEventListener("beforeunload", closeConnection);
   </script>
 </body>
 </html>
